@@ -3,26 +3,36 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+@Controller
 public class TopicController {
     @Autowired // Dependency Injection
     private TopicService topicService;  // Singleton Class
-
+    //Model is a container
     @RequestMapping("/topics")
-    public List<Topic> getTopics() {
-        return topicService.getTopics();
+    public String getTopics(Model model) {
+        model.addAttribute("topics", topicService.getTopics());
+        return "topics";
     }
 
+    @RequestMapping("/addTopic")
+    public String addTopic(Model model) {
+        return "addTopic";
+    }
     @RequestMapping("/topics/{id}")
-    public Optional<Topic> getTopic(@PathVariable String id) {
-        return topicService.getTopic(id);
+    public String getTopic(Model model, @PathVariable String id) {
+        topicService.getTopic(id).ifPresent(topic -> model.addAttribute("topic",topic));
+        return "topic";
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/topics/")
-    public void addTopic(@RequestBody Topic topic) {
+    @RequestMapping(method = RequestMethod.POST, value = "/topics")
+    public String addTopic(Topic topic, Model model) {
         topicService.addTopic(topic);
+        model.addAttribute("topics", topicService.getTopics());
+        return "topics";
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/topics/{id}")
